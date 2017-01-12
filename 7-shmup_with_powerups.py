@@ -232,6 +232,8 @@ hurt_sound = pygame.mixer.Sound(path.join(snd_dir, "hurt.wav"))
 hurt_sound.set_volume(0.25)
 shoot_sound = pygame.mixer.Sound(path.join(snd_dir, "shoot.wav"))
 shoot_sound.set_volume(0.15)
+powerup_sound = pygame.mixer.Sound(path.join(snd_dir, "powerup.wav"))
+powerup_sound.set_volume(0.15)
 explosion_sounds = []
 for filename in ["explosion.wav"]:
 	explosion_sounds.append(pygame.mixer.Sound(path.join(snd_dir, filename)))
@@ -301,7 +303,7 @@ while running:
 	# Check for collisions of player and powerups
 	hits = pygame.sprite.spritecollide(player, powerups, True)
 	for hit in hits:
-		hurt_sound.play()
+		powerup_sound.play()
 		player.shield = 100
 
 	# Check for collisions of bullets and powerups
