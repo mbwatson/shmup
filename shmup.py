@@ -1,5 +1,5 @@
 # Pygame template - skeleton for a new pygame project
-# Music: "Cluster Buster - The Wrong Arm Of The Law Is Back" written,produced and performed by Cluster Buster aka Ove Melaa (Omsoftware@hotmail.com)
+# Frozen Jam by tgfcoder <https://twitter.com/tgfcoder> licensed under CC-BY-3 <http://creativecommons.org/licenses/by/3.0/>
 
 import pygame
 import random
@@ -238,7 +238,7 @@ hurt_sound = pygame.mixer.Sound(path.join(snd_dir, "hurt.wav"))
 hurt_sound.set_volume(0.25)
 death_sound = pygame.mixer.Sound(path.join(snd_dir, "rumble.ogg"))
 death_sound.set_volume(0.25)
-pygame.mixer.music.load(path.join(snd_dir, "Cluster Buster - The Wrong Arm Of The Law Is Back.mp3"))
+pygame.mixer.music.load(path.join(snd_dir, "tgfcoder-FrozenJam-SeamlessLoop.ogg"))
 pygame.mixer.music.set_volume(0.15)
 
 #######################
