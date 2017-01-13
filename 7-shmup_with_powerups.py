@@ -203,7 +203,10 @@ class Powerup(pygame.sprite.Sprite):
 			self.rect = self.image.get_rect()
 			self.rect.center = old_center
 
-# Load all game graphics
+##########################
+# Load all game graphics #
+##########################
+
 background = pygame.image.load(path.join(img_dir, "starfield.png")).convert()
 background_rect = background.get_rect()
 player_img = pygame.image.load(path.join(img_dir, "playerShip1_orange.png")).convert()
@@ -242,7 +245,10 @@ for snd in explosion_sounds:
 pygame.mixer.music.load(path.join(snd_dir, "Cluster Buster - The Wrong Arm Of The Law Is Back.mp3"))
 pygame.mixer.music.set_volume(0.50)
 
-# All Characters
+#########################
+# Initialize Characters #
+#########################
+
 all_sprites = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
 
@@ -254,7 +260,7 @@ bullets = pygame.sprite.Group()
 powerups = pygame.sprite.Group()
 
 # Spawn mobs
-for i in range(10):
+for i in range(20):
 	spawn_mob()
 # Initialize score
 score = 0
@@ -262,7 +268,10 @@ score = 0
 # Cue music!
 pygame.mixer.music.play()
 
-# Game loop
+#############
+# Game loop #
+#############
+
 running = True
 
 while running:
