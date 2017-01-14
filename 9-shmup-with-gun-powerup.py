@@ -77,8 +77,6 @@ class Player(pygame.sprite.Sprite):
 		self.lives = 3
 		self.hidden = False
 		self.hide_timer = pygame.time.get_ticks()
-		self.power = 1
-		self.power_time = pygame.time.get_ticks()
 
 	def update(self):
 		# unhide if hidden
@@ -96,26 +94,14 @@ class Player(pygame.sprite.Sprite):
 			self.shoot()
 		self.rect.x += self.dx
 
-	def powerup(self):
-		self.power = min(self.power + 1, 3)
-		self.power_time = pygame.time.get_ticks()
-
 	def shoot(self):
 		now = pygame.time.get_ticks()
 		if now - self.last_shot >= self.shoot_delay:
 			self.last_shot = now
-			if self.power == 1 or self.power == 3:
-				bullet = Bullet(self.rect.centerx, self.rect.top)
-				all_sprites.add(bullet)
-				bullets.add(bullet)
+			bullet = Bullet(self.rect.centerx, self.rect.top)
+			all_sprites.add(bullet)
+			bullets.add(bullet)
 			shoot_sound.play()
-			if self.power == 2 or self.power == 3:
-				left_bullet = Bullet(self.rect.left, self.rect.centery)
-				right_bullet = Bullet(self.rect.right, self.rect.centery)
-				all_sprites.add(left_bullet)
-				all_sprites.add(right_bullet)
-				bullets.add(left_bullet)
-				bullets.add(right_bullet)
 
 	def hide(self):
 		# temporarily hide player
@@ -148,7 +134,7 @@ class Pow(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.center = center
 		self.dx = dx
-		self.dy = dy / 2 + 1
+		self.dy = dy / 2
 
 	def update(self):
 		self.rect.x += self.dx
@@ -338,12 +324,12 @@ while running:
 	# Player / Mobs Collision
 	hits = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_circle)
 	for hit in hits:
- 		explosion = Explosion('sm', hit.rect.center, 0, 0)
- 		all_sprites.add(explosion)
-		hurt_sound.play()
- 		player.shield -= hit.radius
-		player.power = max(1, player.power - 1)
 		spawn_mob()
+ 		explosion = Explosion('sm', hit.rect.center, 0, 0)
+		hurt_sound.play()
+ 		all_sprites.add(explosion)
+ 		spawn_mob()
+ 		player.shield -= hit.radius
 		if player.shield <= 0:
 			death_explosion = Explosion('death', player.rect.center, 0, 0)
 			death_sound.play()
@@ -351,15 +337,14 @@ while running:
 			player.hide()
 			player.lives -= 1
 			player.shield = 100
-			player.power = 1
 
 	# Player / Powerups Collision
 	hits = pygame.sprite.spritecollide(player, powerups, True)
 	for hit in hits:
 		if hit.type == 'shield':
 			player.shield = min(player.shield + 20, 100)
-		if hit.type == 'gun':
-			player.powerup()
+		# if hit.type == 'gun':
+		# 	player.shield += 20
 	
 	# if player dies and explosion has finished
 	if player.lives == 0 and not death_explosion.alive():
@@ -371,7 +356,6 @@ while running:
 	all_sprites.draw(screen)
 	draw_text(screen, str(score), 18, WIDTH / 2, 10)
 	draw_shield_bar(screen, 5, 5, player.shield)
-	draw_text(screen, "Power: {}".format(str(player.power)), 18, 10, 30)
 	draw_lives(screen, WIDTH - 30, 5, player.lives, player_mini_img )
 	# *after* drawing everything, flip the display
 	pygame.display.flip()
