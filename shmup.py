@@ -29,8 +29,8 @@ pygame.display.set_caption("Shmup!")
 clock = pygame.time.Clock()
 
 font_name = pygame.font.match_font('monospace')
-def draw_text(surface, text, type, x, y):
-	font = pygame.font.Font(font_name, type)
+def draw_text(surface, text, size, x, y):
+	font = pygame.font.Font(font_name, size)
 	text_surface = font.render(text, True, WHITE) # T/F for anti-aliasing
 	text_rect = text_surface.get_rect()
 	text_rect.midtop = (x,y)
@@ -126,7 +126,7 @@ class Player(pygame.sprite.Sprite):
 class Bullet(pygame.sprite.Sprite):
 	def __init__(self, x, y):
 		pygame.sprite.Sprite.__init__(self)
-		self.image = pygame.transform.scale(bullet_img, (6, 27))
+		self.image = pygame.transform.scale(bullet_img, (3, 27))
 		self.image.set_colorkey(BLACK)
 		self.rect = self.image.get_rect()
 		self.rect.centerx = x
@@ -166,9 +166,9 @@ class Mob(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.radius = int(self.rect.width * 0.85 / 2)
 		# pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
-		self.rect.x = random.randrange(WIDTH - self.rect.width)
+		self.rect.x = random.randrange(WIDTH)
 		self.rect.y = random.randrange(-150,-100)
-		self.dx = random.randrange(-4,4)
+		self.dx = random.randrange(-3,3)
 		self.dy = random.randrange(1,5)
 		self.rot = 0
 		self.drot = random.randrange(-5,5)
@@ -206,7 +206,7 @@ class Explosion(pygame.sprite.Sprite):
 		self.dy = dy
 		self.frame = 0
 		self.last_update = pygame.time.get_ticks()
-		self.frame_rate = 75
+		self.frame_rate = 50
 
 	def update(self):
 		self.rect.centerx += self.dx
@@ -229,7 +229,7 @@ background_rect = background.get_rect()
 player_img = pygame.image.load(path.join(img_dir, "playerShip2_blue.png")).convert()
 player_mini_img = pygame.transform.scale(player_img, (25, 19))
 player_mini_img.set_colorkey(BLACK)
-bullet_img = pygame.image.load(path.join(img_dir, "laserRed16.png")).convert()
+bullet_img = pygame.image.load(path.join(img_dir, "laserBlue01.png")).convert()
 shield_powerup_img = pygame.image.load(path.join(img_dir, "shield_gold.png")).convert()
 gun_powerup_img = pygame.image.load(path.join(img_dir, "star_gold.png")).convert()
 meteor_images = []
@@ -277,9 +277,9 @@ death_sound.set_volume(0.25)
 pygame.mixer.music.load(path.join(snd_dir, "tgfcoder-FrozenJam-SeamlessLoop.ogg"))
 pygame.mixer.music.set_volume(0.10)
 
-#######################
-# Load all characters #
-#######################
+###########################
+# Generate all characters #
+###########################
 
 all_sprites = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
@@ -301,9 +301,11 @@ score = 0
 # Cue music!
 pygame.mixer.music.play()
 
-# # # # # # #
-# Game loop #
-# # # # # # #
+# # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # #
+# # #     Game loop     # # #
+# # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # #
 
 running = True
 
@@ -319,17 +321,17 @@ while running:
 			if event.key == pygame.K_ESCAPE:
 				running = False
 
-	# Update
+	# Update all Sprites
 	all_sprites.update()
 
 	# Bullets / Mobs Collision
 	hits = pygame.sprite.groupcollide(mobs, bullets, True, True)
 	for hit in hits:
-		score += 100 - hit.radius
+		score += ( 100 - hit.radius ) / 2 + 1
  		random.choice(explosion_sounds).play()
  		explosion = Explosion('lg', hit.rect.center, hit.dx, hit.dy)
  		all_sprites.add(explosion)
- 		if random.random() > 0:
+ 		if random.random() > 0.25:        
  			pow = Pow(hit.rect.center, hit.dx, hit.dy)
  			all_sprites.add(pow)
  			powerups.add(pow)
@@ -356,10 +358,16 @@ while running:
 	# Player / Powerups Collision
 	hits = pygame.sprite.spritecollide(player, powerups, True)
 	for hit in hits:
+		score += 500
 		if hit.type == 'shield':
 			player.shield = min(player.shield + 20, 100)
 		if hit.type == 'gun':
 			player.powerup()
+	
+	# Bullets / Powerups Collision
+	hits = pygame.sprite.groupcollide(bullets, powerups, True, True)
+	for hit in hits:
+		hit.kill()
 	
 	# if player dies and explosion has finished
 	if player.lives == 0 and not death_explosion.alive():
@@ -371,7 +379,7 @@ while running:
 	all_sprites.draw(screen)
 	draw_text(screen, str(score), 18, WIDTH / 2, 10)
 	draw_shield_bar(screen, 5, 5, player.shield)
-	draw_text(screen, "Power: {}".format(str(player.power)), 18, 10, 30)
+	# draw_text(screen, "Power: {}".format(str(player.power)), 12, 35, 30)
 	draw_lives(screen, WIDTH - 30, 5, player.lives, player_mini_img )
 	# *after* drawing everything, flip the display
 	pygame.display.flip()
