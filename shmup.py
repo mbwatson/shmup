@@ -1,5 +1,5 @@
 # Pygame template - skeleton for a new pygame project
-# Frozen Jam by tgfcoder <https://twitter.com/tgfcoder> licensed under CC-BY-3 <http://creativecommons.org/licenses/by/3.0/>
+# "Dark Ambience Loop by Iwan Gabovitch qubodup.net" or "Dark Ambience Loop by Iwan Gabovitch http://opengameart.org/users/qubodup"
 
 import pygame
 import random
@@ -30,9 +30,10 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Shmup!")
 clock = pygame.time.Clock()
 
-font_name = pygame.font.match_font('monospace')
+# font_name = pygame.font.match_font('monospace')
 def draw_text(surface, text, size, x, y):
-	font = pygame.font.Font(font_name, size)
+	# font = pygame.font.Font(font_name, size)
+	font = pygame.font.Font("fonts/kenvector_future_thin.ttf", size)
 	text_surface = font.render(text, True, WHITE) # T/F for anti-aliasing
 	text_rect = text_surface.get_rect()
 	text_rect.midtop = (x,y)
@@ -301,11 +302,14 @@ class Explosion(pygame.sprite.Sprite):
 				self.image = explosion_anim[self.type][self.frame]
 			self.last_update = now
 
-def show_game_over_screen():
+def show_pause_screen():
 	screen.blit(background, background_rect)
-	draw_text(screen, "SHMUP!", 64, WIDTH / 2, HEIGHT / 4)
-	draw_text(screen, "Arrow keys move, Space to fire", 24, WIDTH / 2, HEIGHT / 2)
-	draw_text(screen, "Press any key to begin", 18, WIDTH / 2, HEIGHT * 3 / 4)
+	draw_text(screen, "PAUSED!", 64, WIDTH / 2, HEIGHT / 5)
+	draw_text(screen, "C o n t r o l s :", 24, WIDTH / 2, HEIGHT * 7 / 16)
+	draw_text(screen, "Move: left & right arrows", 18, WIDTH / 2, HEIGHT * 16 / 32)
+	draw_text(screen, "Shoot: spacebar", 18, WIDTH / 2, HEIGHT * 18 /32)
+	draw_text(screen, "Press any key to resume", 24, WIDTH / 2, HEIGHT * 28 / 32)
+	draw_text(screen, "Press q to quit", 24, WIDTH / 2, HEIGHT * 30 / 32)
 	pygame.display.flip()
 	waiting = True
 	while waiting:
@@ -313,6 +317,28 @@ def show_game_over_screen():
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
+			if event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_q:
+					pygame.quit()
+				else: waiting = False
+
+def show_game_over_screen():
+	screen.blit(background, background_rect)
+	draw_text(screen, "SPACE GAME!", 64, WIDTH / 2, HEIGHT / 5)
+	draw_text(screen, "C o n t r o l s :", 24, WIDTH / 2, HEIGHT * 7 / 16)
+	draw_text(screen, "Move: left & right arrows", 18, WIDTH / 2, HEIGHT * 16 / 32)
+	draw_text(screen, "Shoot: spacebar", 18, WIDTH / 2, HEIGHT * 18 /32)
+	draw_text(screen, "Press any key to begin", 24, WIDTH / 2, HEIGHT * 28 / 32)
+	draw_text(screen, "Press q to quit", 24, WIDTH / 2, HEIGHT * 30 / 32)
+	pygame.display.flip()
+	waiting = True
+	while waiting:
+		clock.tick(FPS)
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+			if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+					pygame.quit()
 			if event.type == pygame.KEYUP:
 				waiting = False
 
@@ -383,7 +409,7 @@ powerup_sound = pygame.mixer.Sound(path.join(snd_dir, "powerup.wav"))
 powerup_sound.set_volume(0.5)
 death_sound = pygame.mixer.Sound(path.join(snd_dir, "rumble.ogg"))
 death_sound.set_volume(0.5)
-pygame.mixer.music.load(path.join(snd_dir, "tgfcoder-FrozenJam-SeamlessLoop.ogg"))
+pygame.mixer.music.load(path.join(snd_dir, "Iwan Gabovitch - Dark Ambience Loop.mp3"))
 pygame.mixer.music.set_volume(0.50)
 
 # Cue music!
@@ -397,8 +423,12 @@ pygame.mixer.music.play(-1)
 
 running = True
 game_over = True
+pause = False
 
 while running:
+	if pause:
+		show_pause_screen()
+		pause = False
 	if game_over:
 		show_game_over_screen()
 		game_over = False
@@ -419,6 +449,7 @@ while running:
 
 	# keep loop running at the right speed
 	clock.tick(FPS)
+
 	# Process input (events)
 	for event in pygame.event.get():
 		# check for closing window
@@ -426,7 +457,7 @@ while running:
 			running = False
 		elif event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_ESCAPE:
-				running = False
+				pause = True
 
 	# Update all Sprites
 	all_sprites.update()
