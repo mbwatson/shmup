@@ -19,6 +19,7 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
+LASERBLUE = (0, 189, 242)
 
 # initialize pygame and create window
 pygame.init()
@@ -46,7 +47,6 @@ def draw_shield_bar(surface, x, y, amt):
 	bar_fill = pygame.Rect(x, y, fill, BAR_HEIGHT)
 	pygame.draw.rect(surface, GREEN, bar_fill)
 	pygame.draw.rect(surface, WHITE, bar_outline, 2)
-	# draw_text(surface, str(amt), 18, 10, 30)
 
 def draw_ammo_bar(surface, x, y, amt):
 	if amt < 0:
@@ -55,10 +55,9 @@ def draw_ammo_bar(surface, x, y, amt):
 	BAR_HEIGHT = 20
 	fill = (amt / float(player.max_ammo)) * BAR_LENGTH
 	bar_outline = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
-	bar_fill = pygame.Rect(x, y, fill, BAR_HEIGHT)
-	pygame.draw.rect(surface, BLUE, bar_fill)
+	bar_fill = pygame.Rect(x, y, fill, BAR_HEIGHT)	
+	pygame.draw.rect(surface, LASERBLUE, bar_fill)
 	pygame.draw.rect(surface, WHITE, bar_outline, 2)
-	# draw_text(surface, str(amt), 18, 10, 30)
 
 def draw_lives(surface, x, y, lives, img):
 	for i in range(lives):
@@ -84,16 +83,16 @@ class Player(pygame.sprite.Sprite):
 		self.rect.bottom = HEIGHT - 10
 		self.dx = 0
 		self.shield = 100
-		self.shoot_delay = 250
+		self.shoot_delay = 100
 		self.last_shot = pygame.time.get_ticks()
 		self.lives = 3
 		self.hidden = False
 		self.hide_timer = pygame.time.get_ticks()
 		self.power = 1
 		self.power_time = pygame.time.get_ticks()
-		self.max_ammo = 20
+		self.max_ammo = 50
+		self.ammo = 50
 		self.last_ammo_add = pygame.time.get_ticks()
-		self.ammo = 20
 
 	def update(self):
 		# unhide if hidden
@@ -284,18 +283,20 @@ for i in range(9):
 ########################
 
 shoot_sound = pygame.mixer.Sound(path.join(snd_dir, "shoot.wav"))
-shoot_sound.set_volume(0.15)
+shoot_sound.set_volume(1)
 explosion_sounds = []
 for filename in ["explosion.wav"]:
 	explosion_sounds.append(pygame.mixer.Sound(path.join(snd_dir, filename)))
 for snd in explosion_sounds:
-	snd.set_volume(0.25)
+	snd.set_volume(1)
 hurt_sound = pygame.mixer.Sound(path.join(snd_dir, "hurt.wav"))
-hurt_sound.set_volume(0.25)
+hurt_sound.set_volume(1)
+powerup_sound = pygame.mixer.Sound(path.join(snd_dir, "powerup.wav"))
+powerup_sound.set_volume(1)
 death_sound = pygame.mixer.Sound(path.join(snd_dir, "rumble.ogg"))
-death_sound.set_volume(0.25)
+death_sound.set_volume(1)
 pygame.mixer.music.load(path.join(snd_dir, "tgfcoder-FrozenJam-SeamlessLoop.ogg"))
-pygame.mixer.music.set_volume(0.10)
+pygame.mixer.music.set_volume(0.50)
 
 ###########################
 # Generate all characters #
@@ -319,7 +320,7 @@ for i in range(10):
 score = 0
 
 # Cue music!
-pygame.mixer.music.play()
+pygame.mixer.music.play(-1)
 
 # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # #
@@ -373,12 +374,14 @@ while running:
 			player.hide()
 			player.lives -= 1
 			player.shield = 100
+			player.ammo = player.max_ammo
 			player.power = 1
 
 	# Player / Powerups Collision
 	hits = pygame.sprite.spritecollide(player, powerups, True)
 	for hit in hits:
 		score += 500
+		powerup_sound.play()
 		if hit.type == 'shield':
 			player.shield = min(player.shield + 20, 100)
 		if hit.type == 'gun':
