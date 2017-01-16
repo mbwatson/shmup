@@ -7,12 +7,13 @@ from os import path
 
 img_dir = path.join(path.dirname(__file__), "img")
 snd_dir = path.join(path.dirname(__file__), "snd")
+font_dir = path.join(path.dirname(__file__), "fonts")
 
 WIDTH = 480
 HEIGHT = 600
 FPS = 60
 
-# define colors
+# Define colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -21,6 +22,10 @@ BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 LASER_BAR_COLOR = (0, 189, 242)
 SHIELD_BAR_COLOR = (255, 199, 56)
+
+# Define fonts
+TITLE_FONT = "kenpixel_blocks.ttf"
+TEXT_FONT = "kenvector_future_thin.ttf"
 
 # initialize pygame and create window
 pygame.init()
@@ -31,9 +36,9 @@ pygame.display.set_caption("Shmup!")
 clock = pygame.time.Clock()
 
 # font_name = pygame.font.match_font('monospace')
-def draw_text(surface, text, size, x, y):
+def draw_text(surface, text, size, x, y, style = TEXT_FONT):
 	# font = pygame.font.Font(font_name, size)
-	font = pygame.font.Font("fonts/kenvector_future_thin.ttf", size)
+	font = pygame.font.Font(path.join(font_dir, style), size)
 	text_surface = font.render(text, True, WHITE) # T/F for anti-aliasing
 	text_rect = text_surface.get_rect()
 	text_rect.midtop = (x,y)
@@ -302,14 +307,15 @@ class Explosion(pygame.sprite.Sprite):
 				self.image = explosion_anim[self.type][self.frame]
 			self.last_update = now
 
-def show_pause_screen():
+def show_game_begin_screen():
 	screen.blit(background, background_rect)
-	draw_text(screen, "PAUSED!", 64, WIDTH / 2, HEIGHT / 5)
-	draw_text(screen, "C o n t r o l s :", 24, WIDTH / 2, HEIGHT * 7 / 16)
+	draw_text(screen, "SPACE", 70, WIDTH / 2, HEIGHT * 3 / 32, TITLE_FONT)
+	draw_text(screen, "BLASTER", 86, WIDTH / 2 + 10, HEIGHT * 6 / 32 - 1, TITLE_FONT)
+	draw_text(screen, "C o n t r o l s :", 24, WIDTH / 2, HEIGHT * 7 / 16, TITLE_FONT)
 	draw_text(screen, "Move: left & right arrows", 18, WIDTH / 2, HEIGHT * 16 / 32)
-	draw_text(screen, "Shoot: spacebar", 18, WIDTH / 2, HEIGHT * 18 /32)
-	draw_text(screen, "Press any key to resume", 24, WIDTH / 2, HEIGHT * 28 / 32)
-	draw_text(screen, "Press q to quit", 24, WIDTH / 2, HEIGHT * 30 / 32)
+	draw_text(screen, "Shoot: spacebar", 18, WIDTH / 2, HEIGHT * 17 /32)
+	draw_text(screen, "Press any key to begin", 24, WIDTH / 2, HEIGHT * 28 / 32, TITLE_FONT)
+	draw_text(screen, "q to quit", 18, WIDTH / 2, HEIGHT * 30 / 32)
 	pygame.display.flip()
 	waiting = True
 	while waiting:
@@ -317,19 +323,38 @@ def show_pause_screen():
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
-			if event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_q:
+			if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
 					pygame.quit()
-				else: waiting = False
+			if event.type == pygame.KEYUP:
+				waiting = False
+
+def show_pause_screen():
+	screen.blit(background, background_rect)
+	draw_text(screen, "PAUSED!", 64, WIDTH / 2, HEIGHT / 5, TITLE_FONT)
+	draw_text(screen, "C o n t r o l s :", 24, WIDTH / 2, HEIGHT * 7 / 16, TITLE_FONT)
+	draw_text(screen, "Move: left & right arrows", 18, WIDTH / 2, HEIGHT * 16 / 32)
+	draw_text(screen, "Shoot: spacebar", 18, WIDTH / 2, HEIGHT * 17 /32)
+	draw_text(screen, "Press any key to resume", 24, WIDTH / 2, HEIGHT * 28 / 32, TITLE_FONT)
+	draw_text(screen, "q to quit", 18, WIDTH / 2, HEIGHT * 30 / 32)
+	pygame.display.flip()
+	waiting = True
+	while waiting:
+		clock.tick(FPS)
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+			if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+				pygame.quit()
+			if event.type == pygame.KEYUP and not event.key == pygame.K_ESCAPE:
+				waiting = False
 
 def show_game_over_screen():
 	screen.blit(background, background_rect)
-	draw_text(screen, "SPACE GAME!", 64, WIDTH / 2, HEIGHT / 5)
-	draw_text(screen, "C o n t r o l s :", 24, WIDTH / 2, HEIGHT * 7 / 16)
-	draw_text(screen, "Move: left & right arrows", 18, WIDTH / 2, HEIGHT * 16 / 32)
-	draw_text(screen, "Shoot: spacebar", 18, WIDTH / 2, HEIGHT * 18 /32)
-	draw_text(screen, "Press any key to begin", 24, WIDTH / 2, HEIGHT * 28 / 32)
-	draw_text(screen, "Press q to quit", 24, WIDTH / 2, HEIGHT * 30 / 32)
+	draw_text(screen, "GAME", 70, WIDTH / 2, HEIGHT * 3 / 32, TITLE_FONT)
+	draw_text(screen, "OVER", 86, WIDTH / 2 + 10, HEIGHT * 6 / 32 - 1, TITLE_FONT)
+	draw_text(screen, "Your score", 24, WIDTH / 2, HEIGHT * 7 / 16, TITLE_FONT)
+	draw_text(screen, "Press any key to play again", 24, WIDTH / 2, HEIGHT * 28 / 32, TITLE_FONT)
+	draw_text(screen, "q to quit", 18, WIDTH / 2, HEIGHT * 30 / 32)
 	pygame.display.flip()
 	waiting = True
 	while waiting:
@@ -422,13 +447,29 @@ pygame.mixer.music.play(-1)
 # # # # # # # # # # # # # # #
 
 running = True
-game_over = True
-pause = False
+game_over = False
+paused = False
+
+show_game_begin_screen()
+# Generate all characters
+all_sprites = pygame.sprite.Group()
+meteors = pygame.sprite.Group()
+enemies = pygame.sprite.Group()
+enemy_bullets = pygame.sprite.Group()
+player = Player()
+all_sprites.add(player)
+bullets = pygame.sprite.Group()
+powerups = pygame.sprite.Group()
+# Spawn meteors
+for i in range(10):
+	spawn_meteor()
+# Initialize score
+score = 0
 
 while running:
-	if pause:
+	if paused:
 		show_pause_screen()
-		pause = False
+		paused = False
 	if game_over:
 		show_game_over_screen()
 		game_over = False
@@ -457,7 +498,7 @@ while running:
 			running = False
 		elif event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_ESCAPE:
-				pause = True
+				paused = True
 
 	# Update all Sprites
 	all_sprites.update()
@@ -466,8 +507,9 @@ while running:
 	if random.random() < 0.005 and not enemies:
 		spawn_enemy()
 
-	# Bullets / Meteors Collision
+	# (All) Bullets / Meteors Collision
 	hits = pygame.sprite.groupcollide(meteors, bullets, True, True)
+	hits.update(pygame.sprite.groupcollide(meteors, enemy_bullets, True, True))
 	for hit in hits:
 		score += ( 100 - hit.radius ) / 2 + 1
  		random.choice(explosion_sounds).play()
@@ -524,6 +566,12 @@ while running:
 			player.ammo = player.max_ammo
 			player.power = 1
 
+	# (All) Bullets / Powerups Collision
+	hits = pygame.sprite.groupcollide(bullets, powerups, True, True)
+	hits.update(pygame.sprite.groupcollide(enemy_bullets, powerups, True, True))
+	for hit in hits:
+		hit.kill()
+	
 	# Player / Powerups Collision
 	hits = pygame.sprite.spritecollide(player, powerups, True)
 	for hit in hits:
@@ -533,11 +581,6 @@ while running:
 			player.shield = min(player.shield + 20, 100)
 		if hit.type == 'gun':
 			player.powerup()
-	
-	# Bullets / Powerups Collision
-	hits = pygame.sprite.groupcollide(bullets, powerups, True, True)
-	for hit in hits:
-		hit.kill()
 	
 	# if player dies and explosion has finished
 	if player.lives == 0 and not death_explosion.alive():
