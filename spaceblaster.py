@@ -243,8 +243,8 @@ class EnemyBullet(pygame.sprite.Sprite):
 
 	def update(self):
 		self.rect.y += self.dy
-		# kill if leaves top of screen
-		if self.rect.bottom < 0:
+		# kill if leaves bottom of screen
+		if self.rect.bottom > HEIGHT + 30:
 			self.kill()
 
 class Meteor(pygame.sprite.Sprite):
@@ -464,13 +464,13 @@ all_sprites = pygame.sprite.Group()
 meteors = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 enemy_bullets = pygame.sprite.Group()
-player = Player()
-all_sprites.add(player)
 bullets = pygame.sprite.Group()
 powerups = pygame.sprite.Group()
-# Spawn meteors
+player = Player()
 for i in range(10):
 	spawn_meteor()
+all_sprites.add(player)
+# Spawn meteors
 # Initialize score
 score = 0
 enemy_kill_count = 0
@@ -607,7 +607,11 @@ while running:
 	draw_shield_bar(screen, 5, 7, player.shield)
 	draw_ammo_bar(screen, 5, 35, player.ammo)
 	draw_lives(screen, WIDTH - 30, 5, player.lives, player_mini_img )
-	# *after* drawing everything, flip the display
+	# debuggging stuff
+	# draw_text(screen, "Meteors: {}".format(str(len(meteors))), 10, WIDTH / 2, HEIGHT * 7 / 16, TEXT_FONT)
+	# draw_text(screen, "Enemies: {}".format(str(len(enemies))), 10, WIDTH / 2, HEIGHT * 8 / 16, TEXT_FONT)
+	# draw_text(screen, "Enemy Bullets: {}".format(str(len(enemy_bullets))), 10, WIDTH / 2, HEIGHT * 9 / 16, TEXT_FONT)
+	# After drawing everything, flip the display
 	pygame.display.flip()
 
 pygame.quit()
