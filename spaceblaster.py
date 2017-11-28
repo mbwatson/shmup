@@ -1,5 +1,5 @@
-# Pygame template - skeleton for a new pygame project
-# "Dark Ambience Loop by Iwan Gabovitch qubodup.net" or "Dark Ambience Loop by Iwan Gabovitch http://opengameart.org/users/qubodup"
+# Space Blaster!
+# Dark Ambience Loop" by Iwan Gabovitch http://opengameart.org/users/qubodup"
 
 import pygame
 import random
@@ -135,7 +135,7 @@ class Player(pygame.sprite.Sprite):
 
 	def shoot(self):
 		now = pygame.time.get_ticks()
-		if now - self.last_shot >= self.shoot_delay:
+		if now - self.last_shot >= self.shoot_delay and not self.hidden:
 			self.last_shot = now
 			self.ammo -= 1
 			if self.power == 1 or self.power == 3:
@@ -607,7 +607,7 @@ while running:
 	draw_shield_bar(screen, 5, 7, player.shield)
 	draw_ammo_bar(screen, 5, 35, player.ammo)
 	draw_lives(screen, WIDTH - 30, 5, player.lives, player_mini_img )
-	# debuggging stuff
+	# Debuggging Stuff
 	# draw_text(screen, "Meteors: {}".format(str(len(meteors))), 10, WIDTH / 2, HEIGHT * 7 / 16, TEXT_FONT)
 	# draw_text(screen, "Enemies: {}".format(str(len(enemies))), 10, WIDTH / 2, HEIGHT * 8 / 16, TEXT_FONT)
 	# draw_text(screen, "Enemy Bullets: {}".format(str(len(enemy_bullets))), 10, WIDTH / 2, HEIGHT * 9 / 16, TEXT_FONT)
